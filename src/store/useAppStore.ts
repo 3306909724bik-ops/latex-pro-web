@@ -118,7 +118,7 @@ const createInitialState = () => {
 };
 
 function createPersistedStateSlice(state: RootState) {
-  const sanitizedUi = {
+  const sanitizedUi: UIState = {
     ...state.ui,
     workspace: {
       trayOpenByBucket: {
