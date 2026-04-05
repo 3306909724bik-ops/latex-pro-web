@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { URL } from 'node:url';
 
-const PORT = Number(process.env.PORT || 8787);
+const PORT = Number(process.env.PORT || 8080);
 const DEMO_ACCESS_CODE = process.env.DEMO_ACCESS_CODE || '';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
@@ -134,9 +134,10 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
 
-  if (req.method === 'GET' && url.pathname === '/api/health') {
+  if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/health' || url.pathname === '/api/health')) {
     sendJson(req, res, 200, {
       ok: true,
+      service: 'latex-pro-web-minimal-backend',
       accessCodeConfigured: Boolean(DEMO_ACCESS_CODE),
       openaiConfigured: Boolean(OPENAI_API_KEY),
     });
@@ -209,6 +210,6 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`latex-pro-web minimal backend listening on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`latex-pro-web minimal backend listening on http://0.0.0.0:${PORT}`);
 });
