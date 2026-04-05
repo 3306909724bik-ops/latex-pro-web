@@ -12,7 +12,18 @@ export type OpenAIUserContentPart =
 const DEMO_ACCESS_CODE_STORAGE_KEY = 'latex-pro-web-demo-access-code';
 
 function readEnv(key: string): string | undefined {
-  return (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.[key];
+  const value = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env?.[key];
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function requireEnv(key: string): string {
+  const value = readEnv(key);
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+
+  return value;
 }
 
 export function getStoredDemoAccessCode(): string {
@@ -37,7 +48,7 @@ export async function verifyAndStoreDemoAccessCode(code: string): Promise<void> 
     throw new Error('Access code is required.');
   }
 
-  const unlockUrl = readEnv('VITE_UNLOCK_ENDPOINT') || '/api/auth/unlock';
+  const unlockUrl = requireEnv('VITE_UNLOCK_ENDPOINT');
   const response = await fetch(unlockUrl, {
     method: 'POST',
     headers: {
@@ -63,8 +74,8 @@ export function getBrowserOpenAIConfig(): BrowserOpenAIConfig | null {
   }
 
   return {
-    proxyUrl: readEnv('VITE_OPENAI_PROXY_URL') || '/api/openai/chat-completions',
-    unlockUrl: readEnv('VITE_UNLOCK_ENDPOINT') || '/api/auth/unlock',
+    proxyUrl: requireEnv('VITE_OPENAI_PROXY_URL'),
+    unlockUrl: requireEnv('VITE_UNLOCK_ENDPOINT'),
     model: readEnv('VITE_OPENAI_MODEL') || 'gpt-5.1',
     accessCode,
   };
@@ -102,7 +113,7 @@ async function requestChatCompletion(
 ): Promise<string> {
   const config = getBrowserOpenAIConfig();
   if (!config) {
-    throw new Error('OpenAI config not found. Set VITE_OPENAI_API_KEY in your Vite env.');
+    throw new Error('OpenAI config not found. Unlock the demo and ensure VITE_OPENAI_PROXY_URL / VITE_UNLOCK_ENDPOINT are set.');
   }
 
   const response = await fetch(config.proxyUrl, {
