@@ -9,3 +9,8 @@ dist/
 .DS_Store
 Thumbs.db
 coverage/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
